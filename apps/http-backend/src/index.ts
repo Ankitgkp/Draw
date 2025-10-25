@@ -1,18 +1,20 @@
-import express from 'express';
-const app = express();
+import express from "express";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from '@repo/backend-common/config';
-import { middleware } from './middleware';
-import { CreateUserSchema, SigninSchema, CreateRoomSchema } from '@repo/common/types';
-import prismaClient from '@repo/db/client';
+import { middleware } from "./middleware";
+import { CreateUserSchema, SigninSchema, CreateRoomSchema } from "@repo/common/types";
+import prismaClient from "@repo/db/client";
+
+const app = express();
 app.use(express.json());
 
-app.post('/signup', async (req, res) => {
+app.post("/signup", async (req, res) => {
 
     const parsedData = CreateUserSchema.safeParse(req.body);
     if (!parsedData.success) {
+        console.log(parsedData.error);
         res.json({
-            message: "Incorrect Inputs"
+            message: "Incorrect inputs"
         })
         return;
     }
@@ -20,35 +22,31 @@ app.post('/signup', async (req, res) => {
         const user = await prismaClient.user.create({
             data: {
                 email: parsedData.data?.username,
-                password: parsedData.data?.password,
+                // TODO: Hash the pw
+                password: parsedData.data.password,
                 name: parsedData.data.name
             }
         })
-
         res.json({
             userId: user.id
         })
     } catch (e) {
         res.status(411).json({
-            messsage: "User already exists with this username"
+            message: "User already exists with this username"
         })
     }
-
-
 })
 
-
-
-app.post('/signin', async (req, res) => {
-
+app.post("/signin", async (req, res) => {
     const parsedData = SigninSchema.safeParse(req.body);
     if (!parsedData.success) {
         res.json({
-            message: "Incorrect Inputs"
+            message: "Incorrect inputs"
         })
         return;
     }
 
+    // TODO: Compare the hashed pws here
     const user = await prismaClient.user.findFirst({
         where: {
             email: parsedData.data.username,
@@ -72,17 +70,15 @@ app.post('/signin', async (req, res) => {
     })
 })
 
-
-app.post('/room', middleware, async (req, res) => {
-
+app.post("/room", middleware, async (req, res) => {
     const parsedData = CreateRoomSchema.safeParse(req.body);
     if (!parsedData.success) {
         res.json({
-            message: "Incorrect Inputs"
+            message: "Incorrect inputs"
         })
         return;
     }
-    //@ts-ignore
+    // @ts-ignore: TODO: Fix this
     const userId = req.userId;
 
     try {
@@ -98,35 +94,57 @@ app.post('/room', middleware, async (req, res) => {
         })
     } catch (e) {
         res.status(411).json({
-            message: "room already exists"
+            message: "Room already exists with this name"
         })
-
     }
-
 })
 
+app.get("/room/:slug", async (req, res) => {
+    const slug = req.params.slug;
+    
+    try {
+        const room = await prismaClient.room.findUnique({
+            where: {
+                slug: slug
+            }
+        });
 
-app.get('/chats/:roomId', async (req, res)=>{
+        if (!room) {
+            res.status(404).json({
+                message: "Room not found"
+            });
+            return;
+        }
+
+        res.json({
+            room: {
+                id: room.id,
+                slug: room.slug,
+                adminId: room.adminId
+            }
+        });
+    } catch (e) {
+        res.status(500).json({
+            message: "Error fetching room"
+        });
+    }
+})
+
+app.get("/chats/:roomId", async (req, res) => {
     const roomId = Number(req.params.roomId);
     const messages = await prismaClient.chat.findMany({
-        where:{
+        where: {
             roomId: roomId
         },
         orderBy: {
             id: "desc"
         },
-        take: 50 
-    })
+        take: 50
+    });
+
     res.json({
         messages
     })
 })
 
-
-
-
-
-
-app.listen(3001, () => {
-    console.log('HTTP backend listening on port 3001');
-});
+app.listen(3001);
