@@ -1,26 +1,24 @@
 "use client";
-import { initDraw } from "@/draw";
-import { useEffect, useRef } from "react";
+import { RoomCanvas } from "@/components/RoomCanvas";
+import { use, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function Canvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+export default function CanvasPage({
+  params,
+}: {
+  params: Promise<{ roomId: string }>;
+}) {
+  const { roomId } = use(params);
+  const router = useRouter();
 
   useEffect(() => {
-    if (canvasRef.current) {
-
-
-      initDraw(canvasRef.current);
+    // Check if user is authenticated
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please sign in to access the canvas");
+      router.push("/signin");
     }
-  }, [canvasRef]);
+  }, [router]);
 
-  return (
-    <div>
-      <canvas
-        ref={canvasRef}
-        width={window.innerWidth}
-        height={window.innerHeight}
-        className="w-screen h-screen"
-      ></canvas>
-    </div>
-  );
+  return <RoomCanvas roomId={roomId} />;
 }

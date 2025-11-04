@@ -5,14 +5,16 @@ import { JWT_SECRET } from '@repo/backend-common/config';
 import { middleware } from './middleware';
 import { CreateUserSchema, SigninSchema, CreateRoomSchema } from '@repo/common/types';
 import prismaClient from '@repo/db/client';
+import cors from 'cors';
 app.use(express.json());
-
+app.use(cors());
 app.post('/signup', async (req, res) => {
 
     const parsedData = CreateUserSchema.safeParse(req.body);
     if (!parsedData.success) {
-        res.json({
-            message: "Incorrect Inputs"
+        res.status(400).json({
+            message: "Incorrect Inputs",
+            details: parsedData.error.issues
         })
         return;
     }
@@ -29,8 +31,8 @@ app.post('/signup', async (req, res) => {
             userId: user.id
         })
     } catch (e) {
-        res.status(411).json({
-            messsage: "User already exists with this username"
+        res.status(409).json({
+            message: "User already exists with this email"
         })
     }
 
@@ -43,8 +45,9 @@ app.post('/signin', async (req, res) => {
 
     const parsedData = SigninSchema.safeParse(req.body);
     if (!parsedData.success) {
-        res.json({
-            message: "Incorrect Inputs"
+        res.status(400).json({
+            message: "Incorrect Inputs",
+            details: parsedData.error.issues
         })
         return;
     }
@@ -57,8 +60,8 @@ app.post('/signin', async (req, res) => {
     })
 
     if (!user) {
-        res.status(403).json({
-            message: "Not authorized"
+        res.status(401).json({
+            message: "Invalid email or password"
         })
         return;
     }

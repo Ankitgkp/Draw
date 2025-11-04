@@ -1,8 +1,69 @@
+"use client";
 import Link from "next/link";
 import { Button } from "@repo/ui/button";
 import { Card, CardDescription, CardTitle } from "@repo/ui/card";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { HTTP_BACKEND } from "../config";
 
 export default function Home() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [roomName, setRoomName] = useState("");
+  const [roomId, setRoomId] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleCreateRoom = async () => {
+    if (!roomName) {
+      alert("Please enter a room name");
+      return;
+    }
+
+    setLoading(true);
+    const token = localStorage.getItem("token");
+
+    try {
+      const response = await fetch(`${HTTP_BACKEND}/room`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": token || "",
+        },
+        body: JSON.stringify({ name: roomName }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        router.push(`/canvas/${data.roomId}`);
+      } else {
+        alert(data.message || "Failed to create room");
+      }
+    } catch (err) {
+      alert("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoinRoom = () => {
+    if (!roomId) {
+      alert("Please enter a room ID");
+      return;
+    }
+    router.push(`/canvas/${roomId}`);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsAuthenticated(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Header */}
@@ -17,39 +78,97 @@ export default function Home() {
             <span className="text-2xl font-bold text-gray-900">ExceliDraw</span>
           </div>
           <div className="flex items-center space-x-4">
-            <Link href="/signin">
-              <Button variant="ghost" size="default">
-                Sign In
+            {isAuthenticated ? (
+              <Button variant="ghost" size="default" onClick={handleLogout}>
+                Logout
               </Button>
-            </Link>
-            <Link href="/signup">
-              <Button variant="default" size="default">
-                Get Started
-              </Button>
-            </Link>
+            ) : (
+              <>
+                <Link href="/signin">
+                  <Button variant="ghost" size="default">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/signup">
+                  <Button variant="default" size="default">
+                    Get Started
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
         </nav>
       </header>
 
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-20 text-center">
-        <h1 className="text-6xl font-bold text-gray-900 mb-6 leading-tight">
-          Collaborative Drawing<br />Made Simple
-        </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-          Create beautiful diagrams, sketches, and wireframes in real-time with your team. 
-          Free, open-source, and incredibly easy to use.
-        </p>
-        <div className="flex items-center justify-center space-x-4">
-          <Link href="/signup">
-            <Button variant="default" size="lg">
-              Start Drawing Now
-            </Button>
-          </Link>
-          <Button variant="outline" size="lg">
-            Watch Demo
-          </Button>
-        </div>
+        {isAuthenticated ? (
+          <>
+            <h1 className="text-5xl font-bold text-gray-900 mb-6 leading-tight">
+              Ready to Draw?
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Create a new room or join an existing one to start collaborating.
+            </p>
+
+            {/* Create/Join Room Section */}
+            <div className="max-w-2xl mx-auto space-y-6">
+              {/* Create Room */}
+              <Card className="p-8">
+                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Create New Room</h3>
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="text"
+                    placeholder="Enter room name (e.g., my-drawing-room)"
+                    value={roomName}
+                    onChange={(e) => setRoomName(e.target.value)}
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                  />
+                  <Button onClick={handleCreateRoom} disabled={loading} size="lg">
+                    {loading ? "Creating..." : "Create Room"}
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Join Room */}
+              <Card className="p-8">
+                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Join Existing Room</h3>
+                <div className="flex items-center space-x-4">
+                  <input
+                    type="text"
+                    placeholder="Enter room ID"
+                    value={roomId}
+                    onChange={(e) => setRoomId(e.target.value)}
+                    className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                  />
+                  <Button onClick={handleJoinRoom} variant="outline" size="lg">
+                    Join Room
+                  </Button>
+                </div>
+              </Card>
+            </div>
+          </>
+        ) : (
+          <>
+            <h1 className="text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Collaborative Drawing<br />Made Simple
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+              Create beautiful diagrams, sketches, and wireframes in real-time with your team. 
+              Free, open-source, and incredibly easy to use.
+            </p>
+            <div className="flex items-center justify-center space-x-4">
+              <Link href="/signup">
+                <Button variant="default" size="lg">
+                  Start Drawing Now
+                </Button>
+              </Link>
+              <Button variant="outline" size="lg">
+                Watch Demo
+              </Button>
+            </div>
+          </>
+        )}
 
         {/* Canvas Preview */}
         <div className="mt-16 bg-white rounded-2xl shadow-2xl p-8 max-w-5xl mx-auto border border-gray-200">

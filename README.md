@@ -1,6 +1,19 @@
 # Turborepo starter
 
-This Turborepo starter is maintained by the Turborepo core team.
+# DrawSync - Real-Time Collaborative Drawing Platform 🎨
+
+A modern, real-time collaborative drawing application built with Next.js, Express, WebSocket, and PostgreSQL.
+
+## ✨ Features
+
+- 🎨 **Real-time Collaborative Drawing** - Draw together with multiple users
+- 🔐 **JWT Authentication** - Secure user accounts
+- 💬 **Live Communication** - WebSocket-based real-time sync
+- 🏠 **Room Management** - Create and join drawing rooms
+- 💾 **Persistent Storage** - All drawings saved to PostgreSQL
+- 📱 **Modern UI** - Beautiful, responsive design with TailwindCSS
+
+## 🚀 Quick Start
 
 ## Using this example
 
