@@ -191,6 +191,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.2
 
   packages/db:
     dependencies:
@@ -207,6 +210,9 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.2
 
   packages/eslint-config:
     devDependencies:
