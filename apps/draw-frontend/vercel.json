@@ -1,5 +1,3 @@
 {
-  "buildCommand": "cd ../.. && pnpm install && cd apps/draw-frontend && pnpm build",
-  "framework": "nextjs",
-  "installCommand": "pnpm install --filter draw-frontend..."
+  "framework": "nextjs"
 }
