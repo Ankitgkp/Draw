@@ -5,7 +5,7 @@
     "buildCommand": "cd ../.. && pnpm install && cd apps/ws-backend && pnpm build"
   },
   "deploy": {
-    "startCommand": "pnpm start",
+    "startCommand": "cd apps/ws-backend && pnpm start",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
