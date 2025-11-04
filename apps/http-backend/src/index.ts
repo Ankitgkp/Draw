@@ -130,6 +130,8 @@ app.get('/chats/:roomId', async (req, res)=>{
 
 
 
-app.listen(3001, () => {
-    console.log('HTTP backend listening on port 3001');
+const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+    console.log(`HTTP backend listening on port ${PORT}`);
 });
