@@ -95,18 +95,14 @@ wss.on('connection', function connection(ws, request) {
                 return;
             }
 
-            // Try to parse as number to check if it's an ID
             const numericId = parseInt(roomIdOrSlug);
 
-            // Find the room by ID (if numeric) or slug (if string)
             let room;
             if (!isNaN(numericId)) {
-                // It's a number, look up by ID
                 room = await prismaClient.room.findUnique({
                     where: { id: numericId }
                 });
             } else {
-                // It's a string slug, look up by slug
                 room = await prismaClient.room.findUnique({
                     where: { slug: roomIdOrSlug }
                 });
