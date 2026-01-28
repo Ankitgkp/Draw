@@ -4,6 +4,8 @@
 
 A modern, real-time collaborative drawing application built with Next.js, Express, WebSocket, and PostgreSQL.
 
+<img width="1356" height="658" alt="Screenshot 2026-01-29 at 3 30 18 AM" src="https://github.com/user-attachments/assets/610fb978-6315-4a1f-b14d-8c56472b528f" />
+
 ## ✨ Features
 
 - 🎨 **Real-time Collaborative Drawing** - Draw together with multiple users
